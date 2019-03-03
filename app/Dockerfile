@@ -5,6 +5,9 @@ FROM python:3.7-alpine
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+# add requirements.txt to the image
+ADD requirements.txt /usr/src/app/requirements.txt
+
 # set work directory
 WORKDIR /usr/src/app
 
@@ -20,7 +23,8 @@ RUN pip install --upgrade pip
 RUN pip install pipenv
 COPY ./Pipfile /usr/src/app/Pipfile
 RUN pipenv install --skip-lock --deploy --dev
-RUN pip install django
+RUN pip install -r requirements.txt
+
 
 # copy project
 COPY . /usr/src/app/

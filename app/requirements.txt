@@ -1,0 +1,7 @@
+Django==2.1.7
+redis
+psycopg2
+djangorestframework
+django-redis
+celery
+pika
