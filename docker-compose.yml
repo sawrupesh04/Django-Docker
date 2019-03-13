@@ -9,19 +9,66 @@ services:
     ports:
       - 8000:8000
     environment:
-      - SECRET_KEY=please_change_me
+      - SECRET_KEY='7euwp-iq(yoo7*oimx40vt*!c%3_$a6c!ujemq%3vmm$j$e506'
       - SQL_ENGINE=django.db.backends.postgresql
       - SQL_DATABASE=postgres
       - SQL_USER=postgres
       - SQL_PASSWORD=postgres
       - SQL_HOST=db
       - SQL_PORT=5432
+      - C_FORCE_ROOT=true
     depends_on:
       - db
+      - redis
+      - rabbit
+      - mosquitto
+
+
+# postgres
+
   db:
+    container_name: 'postgres_test'
     image: postgres:10.5-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - 'postgres_data:/var/lib/postgresql/data/'
+
+# redis
+
+  redis:
+    restart: always
+    container_name: 'redis_test'
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/data'
+
+
+# rabbit
+
+  rabbit:
+    container_name: rabbit
+    image: rabbitmq:3.6-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    hostname: rabbit1
+    ports:
+      - "15673:15672" # Exposing RabbitMQ web management on different port for convenience
+    restart: always
+
+
+
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    restart: always
+
+
 
 volumes:
   postgres_data:
+  redis_data:

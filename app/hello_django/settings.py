@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
+from __future__ import absolute_import, unicode_literals
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -28,6 +28,38 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+# celery
+
+
+# ^^^ The above is required if you want to import from the celery
+# library.  If you don't have this then `from celery.schedules import`
+# becomes `proj.celery.schedules` in Python 2.x since it allows
+# for relative imports by default.
+
+# Celery settings
+
+
+import environ
+env = environ.Env(
+    DEBUG=(bool, False),
+    POSTGRES_USER=(str, 'postgres'),
+    POSTGRES_PASSWORD=(str, 'postgres'),
+    RABBITMQ_DEFAULT_USER=(str, 'admin'),
+    RABBITMQ_DEFAULT_PASS=(str, 'mypass'),
+)
+
+BROKER_URL = "amqp://{0}:{1}@rabbitmq:5672//".format(env('RABBITMQ_DEFAULT_USER'), env('RABBITMQ_DEFAULT_PASS'))
+
+"""
+CELERY_BROKER_URL = 'amqp://admin:mypass@localhost//'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_RESULT_BACKEND = 'db+sqlite:///results.sqlite'
+CELERY_TASK_SERIALIZER = 'json'
+"""
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,6 +71,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'patient.apps.PatientConfig',
     'rest_framework',
+    #'djcelery',
 ]
 
 MIDDLEWARE = [

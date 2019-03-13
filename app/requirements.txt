@@ -5,3 +5,5 @@ djangorestframework
 django-redis
 celery
 pika
+paho-mqtt
+django-environ

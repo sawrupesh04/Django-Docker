@@ -26,5 +26,6 @@ RUN pipenv install --skip-lock --deploy --dev
 RUN pip install -r requirements.txt
 
 
+
 # copy project
 COPY . /usr/src/app/
