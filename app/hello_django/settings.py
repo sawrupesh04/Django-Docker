@@ -48,7 +48,8 @@ env = environ.Env(
     RABBITMQ_DEFAULT_PASS=(str, 'mypass'),
 )
 
-BROKER_URL = "amqp://{0}:{1}@rabbitmq:5672//".format(env('RABBITMQ_DEFAULT_USER'), env('RABBITMQ_DEFAULT_PASS'))
+BROKER_URL = "amqp://admin:mypass@rabbit1:5672//"\
+ #.format(env('RABBITMQ_DEFAULT_USER'), env('RABBITMQ_DEFAULT_PASS'))
 
 """
 CELERY_BROKER_URL = 'amqp://admin:mypass@localhost//'

@@ -17,11 +17,13 @@ services:
       - SQL_HOST=db
       - SQL_PORT=5432
       - C_FORCE_ROOT=true
+    links:
+      - rabbit
     depends_on:
       - db
       - redis
       - rabbit
-      - mosquitto
+ #     - mosquitto
 
 
 # postgres
@@ -46,29 +48,50 @@ services:
 
 # rabbit
 
+
   rabbit:
     container_name: rabbit
-    image: rabbitmq:3.6-management
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=mypass
-    hostname: rabbit1
+    #image: rabbitmq:3.6-management
+    build: ./rabbitmq
     ports:
-      - "15673:15672" # Exposing RabbitMQ web management on different port for convenience
+      - '15672:15672'
+      - '5672:5672'
+      - '1883:1883'
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    #environment:
+    #  - RABBITMQ_DEFAULT_USER=admin
+    #  - RABBITMQ_DEFAULT_PASS=mypass
+    #hostname: rabbit1
+    #xposing RabbitMQ web management on different port for convenience
     restart: always
 
-
-
-  mosquitto:
-    container_name: mosquitto
-    image: eclipse-mosquitto:latest
+  #rabbit:
+  #  container_name: rabbit
+    #image: rabbitmq:3.6-management
+   # build: ./rabbitmq
+    #environment:
+    #  - RABBITMQ_DEFAULT_USER=admin
+    #  - RABBITMQ_DEFAULT_PASS=mypass
+   # hostname: rabbit1
+    ##ports:
+     # - '15673:15672' # Exposing RabbitMQ web management on different port for convenience
+     # - '1883:1883'
+     # - '5672:5672'
+    #restart: always
+  rpi_docker_ui:
+    image: portainer/portainer
     ports:
-      - "1883:1883"
-      - "9001:9001"
-    restart: always
+      - "80:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
 
 
 
 volumes:
   postgres_data:
   redis_data:
+  portainer_data:
+  rabbit_data:

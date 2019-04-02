@@ -1,20 +1,25 @@
 from rest_framework import status
 from django.core.cache import cache
 from django.http import HttpResponse
-from .serializers import PatientSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .tasks import hello
 from .models import Patient
+from .serializers import PatientSerializer
 from redis import Redis
+from django.conf import settings
 import pika
+import threading
 import time
+import datetime
 import sys
-#import paho.mqtt.client as paho
+import paho.mqtt.client as paho
+import socket
+
+from .tasks import hello
 
 # broker
-broker = '192.168.0.12'
-port = 1883
+# broker = '192.168.0.12'
+# port = 1883
 TOPIC = 'priya'
 
 # Redis connection
@@ -22,14 +27,36 @@ r = Redis(host='redis', port=6379, db=3)
 
 
 # Rabbit
-
-
-
-
-
-
 def home(request):
-    """
+    mqtthost = "192.168.0.104"
+    mqttuser = "admin"
+    mqttpass = "admin"
+    mqtttopic = "deep"
+
+    def on_connect(client, userdata, flags, rc):
+        print("CONNACK received with code %d." % (rc))
+
+    def on_publish(client, userdata, mid):
+        print("mid: " + str(mid))
+
+    client = paho.Client()
+    client.on_connect = on_connect
+    client.on_publish = on_publish
+    client.username_pw_set(mqttuser, mqttpass)
+    client.connect(mqtthost, 1883, 60)
+
+    client.loop_start()
+
+    message = 'aya'
+    (rc, mid) = client.publish(mqtttopic, str(message), qos=1)
+
+    # time.sleep(10)
+
+    return HttpResponse("Data has been sent")
+    # return HttpResponse("Hello")
+
+
+"""
     def onMqttConnectpub(client, userdata, flags, rc):
         if rc == 0:
             client1.connected_flag = True
@@ -53,10 +80,10 @@ def home(request):
     client2 = paho.Client('client-002')
 
     client1.on_connect = onMqttConnectpub
-    client2.on_connect = onMqttConnectsub
-    client2.on_message = onGetMessage
-    client1.connect(broker, port)
-    client2.connect(broker, port)
+    # client2.on_connect = onMqttConnectsub
+    # client2.on_message = onGetMessage
+    client1.connect('rabbit', 15672)
+    # client2.connect(broker, port)
 
     client1.loop_start()
     client2.loop_start()
@@ -75,13 +102,40 @@ def home(request):
     print(" [x] Sent %r" % message)
     connection.close()
 
-"""
-    greeting = 'Hello, World!'
-    hello.delay(greeting)
-    return HttpResponse(greeting)
-    #cache.set('name', 'rupesh')
-    # return render(request, 'home.html')
-    #return HttpResponse(cache.get('name'))
+    
+    # time_data = list()
+    # file = open('time.txt', 'w')
+    for i in range(10):
+        a = datetime.datetime.now()
+        time = "%s:%s.%s" % (a.hour, a.minute, a.microsecond)
+        # file.write('TIME :  {} '.format(time+'\n'))
+        # time_data.append(time)
+        print(time)
+    # file.close()
+
+    mqtthost = "0.0.0.0"
+    mqttuser = "admin"
+    mqttpass = "mypass"
+    mqtttopic = "hello"
+
+    def on_connect(client, userdata, flags, rc):
+        print("CONNACK received with code %d." % (rc))
+
+    def on_publish(client, userdata, mid):
+        print("mid: " + str(mid))
+
+    client = paho.Client()
+    client.on_connect = on_connect
+    client.on_publish = on_publish
+    client.username_pw_set(mqttuser, mqttpass)
+    client.connect(mqtthost, 1883, 60)
+    client.loop_start()
+
+   # print(socket.gethostname())
+
+    return HttpResponse('END')
+   
+    """
 
 
 @api_view(['GET', 'POST'])
